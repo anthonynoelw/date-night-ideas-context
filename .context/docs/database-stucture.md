@@ -2,6 +2,8 @@
 
 This document outlines the final database schema for the Date Night AI project. It uses **ULIDs** for all primary keys (except for standard Laravel tables where unnecessary) and separates concerns into logical clusters.
 
+Database is a Postresql Db
+
 ## 1. User & Access Cluster
 Handling authentication, extensive user preferences, and subscription management (Cashier).
 

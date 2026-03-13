@@ -6,7 +6,9 @@ This roadmap is split into logical phases, focusing on **Backend/API first**, fo
 *Goal: Establish a working end-to-end connection from Laravel to local Ollama and a basic API structure.*
 
 ### 1.1 Laravel Backend & API (Primary Focus)
-- [ ] **Crud Operations** Set up Crud operations for All User specific Models
+- [x] **Migriations** Set up migrations for all Models *(Mar 13: All 21 migrations created with ULID support)*
+- [x] **Admin Panel** Filament admin panel 'orange-justice' configured *(Mar 13: Panel registered, orange theme applied)*
+- [ ] **Crud Operations** Set up admin resources for models via filament
 - [ ] **Versioning Framework:** Set up API versioning (e.g., `/api/v1/...`) to ensure future scalability.
 - [ ] **Ollama Integration:** Create an `LLMService` to send HTTP requests to a local Ollama instance (default: `localhost:11434`).
 - [ ] **Input Checker (Validation):** Robust FormRequest validation for all incoming generation parameters.

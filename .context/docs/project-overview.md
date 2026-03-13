@@ -11,6 +11,7 @@ A mobile application designed for couples and daters to generate personalized da
 ## 3. Architecture Overview
 The system follows a classic Client-Server architecture with a focus on security and scalability:
 * Client (Flutter): Handles the UI, location services (Geo-data), and theme switching. It communicates exclusively with the Laravel API.
+* Use ddev enviornment
 * Server (Laravel ): Acts as the central orchestrator. It validates requests, fetches external weather data, manages user quotas (Stripe-integrated), and constructs prompts for the LLM.
 * Database (PostgreSQL): Stores user profiles, preferences, and session history.
 * LLM Layer: Development: Local Ollama instance. Production: Cloud-based LLM (e.g., OpenAI/Anthropic) accessed via Laravel.

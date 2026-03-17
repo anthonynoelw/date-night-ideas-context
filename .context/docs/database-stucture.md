@@ -14,17 +14,18 @@ Handling authentication, extensive user preferences, and subscription management
 * **`email_verified_at`**: Timestamp (Nullable)
 * **`password`**: String (Hashed)
 * **`remember_token`**: String (100, Nullable)
-* **`stripe_id`**: String (Indexed, Nullable)
-* **`pm_type`**: String (Nullable)
-* **`pm_last_four`**: String (4, Nullable)
-* **`trial_ends_at`**: Timestamp (Nullable)
+* **`deleted_at`**: Timestamp (Nullable) - *Soft deletes enabled*
 * **`created_at`**: Timestamp
 * **`updated_at`**: Timestamp
+
+**Relationships:**
+* **1:1** - `user_settings`, `personal_access_tokens`, `subscriptions`, `legal_consents`
+* **1:n** - `generation_logs` (generations), `data_export_requests` (exports)
 
 ### `user_settings`
 Extensible storage for all user preferences (e.g., `theme_preference` = `rose_gold`).
 * **`id`**: ULID (Primary Key)
-* **`user_id`**: ULID (Foreign Key -> users)
+* **`user_id`**: ULID (Foreign Key -> users, Nullable)
 * **`key`**: String (Indexed, e.g., 'ui_theme', 'measurement_system')
 * **`value`**: Text (The actual value)
 * **`type`**: Enum ('string', 'boolean', 'integer', 'json') - Helps frontend casting
@@ -33,8 +34,7 @@ Extensible storage for all user preferences (e.g., `theme_preference` = `rose_go
 
 ### `personal_access_tokens` (Sanctum)
 * **`id`**: ULID (Primary Key)
-* **`tokenable_type`**: String
-* **`tokenable_id`**: ULID
+* **`user_id`**: ULID (Foreign Key -> users, Nullable)
 * **`name`**: String
 * **`token`**: String (Unique, Hashed)
 * **`abilities`**: Text (JSON, Nullable)
@@ -45,13 +45,12 @@ Extensible storage for all user preferences (e.g., `theme_preference` = `rose_go
 
 ### `subscriptions` (Cashier)
 * **`id`**: ULID (Primary Key)
-* **`user_id`**: ULID (Foreign Key -> users)
+* **`user_id`**: ULID (Foreign Key -> users, Nullable)
 * **`type`**: String (Default: 'default')
 * **`stripe_id`**: String (Unique)
 * **`stripe_status`**: String (active, trialing, past_due, canceled)
 * **`stripe_price`**: String (Nullable)
 * **`quantity`**: Integer (Nullable)
-* **`trial_ends_at`**: Timestamp (Nullable)
 * **`ends_at`**: Timestamp (Nullable)
 * **`created_at`**: Timestamp
 * **`updated_at`**: Timestamp
@@ -79,7 +78,7 @@ Records *what* was asked for (Analytics/History).
 * **`longitude`**: Decimal (11,8)
 * **`city`**: String (Resolved city name for history)
 * **`weather_snapshot`**: JSON (Full payload from OpenWeather at that second)
-* **`budget_tier`**: String (e.g., '$-$$')
+* **`maximum_budget`**: Decimal (e.g., 100.00)
 * **`energy_level`**: String (low, medium, high)
 * **`llm_provider`**: String (e.g., 'ollama', 'openai')
 * **`llm_model`**: String (e.g., 'llama3')
@@ -88,6 +87,11 @@ Records *what* was asked for (Analytics/History).
 * **`processing_time_ms`**: Integer
 * **`created_at`**: Timestamp
 * **`updated_at`**: Timestamp
+
+**Relationships:**
+* **m:n** - `vibes` (via `generation_log_vibes`)
+* **m:n** - `activity_types` (via `generation_log_activity_types`)
+* **m:n** - `no_goes` (via `generation_log_no_goes`)
 
 ### `generated_ideas`
 Records *what* was returned.
@@ -126,21 +130,34 @@ Pivot linking logs to multiple vibes.
 * **`created_at`**: Timestamp
 * **`updated_at`**: Timestamp
 
-### `tags`
-General-purpose tags for restrictions, dietary needs, etc.
+### `activity_types`
+Replaces generic tags for classifying the specific type of activity.
 * **`id`**: ULID (Primary Key)
 * **`name`**: String
 * **`slug`**: String (Unique)
-* **`type`**: String (Enum: 'restriction', 'dietary', 'activity_type')
 * **`icon`**: String (Nullable)
 * **`created_at`**: Timestamp
 * **`updated_at`**: Timestamp
 
-### `taggables`
-Polymorphic pivot to attach tags to Users (Preferences) or Logs (Specific Request filters).
-* **`tag_id`**: ULID (Foreign Key -> tags)
-* **`taggable_id`**: ULID
-* **`taggable_type`**: String
+### `generation_log_activity_types`
+Pivot linking logs to multiple activity types.
+* **`generation_log_id`**: ULID (Foreign Key -> generation_logs)
+* **`activity_type_id`**: ULID (Foreign Key -> activity_types)
+* **`created_at`**: Timestamp
+
+### `no_goes`
+Replaces generic tags for managing restrictions, dietary needs, and activities to explicitly avoid.
+* **`id`**: ULID (Primary Key)
+* **`name`**: String
+* **`slug`**: String (Unique)
+* **`icon`**: String (Nullable)
+* **`created_at`**: Timestamp
+* **`updated_at`**: Timestamp
+
+### `generation_log_no_goes`
+Pivot linking logs to multiple no goes.
+* **`generation_log_id`**: ULID (Foreign Key -> generation_logs)
+* **`no_go_id`**: ULID (Foreign Key -> no_goes)
 * **`created_at`**: Timestamp
 
 ---
@@ -176,7 +193,7 @@ GDPR Support.
 
 ### `legal_consents`
 * **`id`**: ULID (Primary Key)
-* **`user_id`**: ULID (Foreign Key -> users)
+* **`user_id`**: ULID (Foreign Key -> users, Nullable)
 * **`document_type`**: String (e.g., 'tos', 'privacy')
 * **`version`**: String (e.g., '1.0')
 * **`ip_address`**: String (Nullable, Anonymized)
@@ -184,7 +201,7 @@ GDPR Support.
 
 ### `data_export_requests`
 * **`id`**: ULID (Primary Key)
-* **`user_id`**: ULID (Foreign Key -> users)
+* **`user_id`**: ULID (Foreign Key -> users, Nullable)
 * **`status`**: String (pending, processing, completed, failed)
 * **`download_path`**: String (Nullable)
 * **`expires_at`**: Timestamp

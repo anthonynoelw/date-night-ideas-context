@@ -1,68 +1,43 @@
 # Feature Roadmap: Date Night AI
 
-This roadmap is split into logical phases, focusing on **Backend/API first**, followed by the Frontend implementation for each phase.
+This roadmap follows an **API-First** approach. Security, authentication, and secure data handling are integrated throughout the entire development lifecycle rather than being treated as an afterthought. Development starts with the backend and API infrastructure before moving to the frontend.
 
-## Phase 1: Foundation (Local Dev MVP)
-*Goal: Establish a working end-to-end connection from Laravel to local Ollama and a basic API structure.*
+## Phase 1: Core API & Security Foundation (Backend)
+*Goal: Establish a secure, robust Laravel API with basic user management and LLM integration.*
 
-### 1.1 Laravel Backend & API (Primary Focus)
-- [ ] **Versioning Framework:** Set up API versioning (e.g., `/api/v1/...`) to ensure future scalability.
-- [ ] **Ollama Integration:** Create an `LLMService` to send HTTP requests to a local Ollama instance (default: `localhost:11434`).
-- [ ] **Input Checker (Validation):** Robust FormRequest validation for all incoming generation parameters.
-- [ ] **Generation Endpoint:** `POST /api/v1/generate-ideas` accepting budget, vibe, energy, and no-goes.
-- [ ] **Simple Prompt Builder:** Logic to transform validated inputs into a structured string prompt for the LLM.
-- [ ] **Response Parsing:** Logic to handle the LLM's raw text output and format it into clean JSON for the client.
+* **Security & Authentication Setup:** Implement Laravel Sanctum for secure API tokens, enforce HTTPS, and set up the foundation for GDPR-compliant data storage (data minimization principles).
+* **Database & User Profiles:** Create user schemas, persistent preferences (No-Goes, UI Mode, vibes), and user legal consent records.
+* **Versioning Framework:** Set up a structured API versioning system (e.g., `/api/v1/`) to ensure long-term stability.
+* **Ollama Integration:** Create an `LLMService` to securely communicate with a local Ollama instance for development.
+* **Validation & Input Handling:** Build robust FormRequest validation classes for all incoming generation parameters to prevent injection or malformed data.
+* **Generation Endpoint:** Develop the `POST /api/v1/generate-ideas` endpoint to process budget, vibe, energy, and no-goes securely.
+* **Prompt Builder & Parser:** Implement logic to construct context-rich prompts and safely parse raw LLM text into standardized JSON responses.
 
-### 1.2 Flutter Frontend (Secondary)
-- [ ] **Initial Setup:** Project structure and basic navigation.
-- [ ] **Input Mask (Form):**
-    - [ ] Budget (Slider/Input).
-    - [ ] Vibe Selector (**Tags**: Action, Romantic, Chill).
-    - [ ] Energy Level (Low, Medium, High).
-    - [ ] **Tags** for "No-Goes".
-- [ ] **Results View:** A clean list to display the JSON-parsed ideas.
-- [ ] **Dual-Theme Logic:** Basic implementation of "Default" vs. "Woman-Look" (Rose/Gold) toggle.
+## Phase 2: Context Enrichment & Production Scaling (Backend)
+*Goal: Enhance AI accuracy with real-time data and prepare the API for production and monetization.*
 
----
+* **Weather & Location Integration:** Build services to fetch real-time OpenWeather data based on coordinates, implementing caching to prevent rate-limit abuse and reduce costs.
+* **Advanced Prompting:** Update prompt templates to dynamically inject environmental context (e.g., "It's raining outside") securely.
+* **Data History & Quotas:** Implement database logic to track request history securely and enforce "5 free ideas per week" rate limiting per user.
+* **GDPR Tooling:** Develop automated endpoints for user data export and account deletion to guarantee compliance.
+* **Granular API Key Management:** Allow consumers to generate multiple API keys with fine-grained permissions (e.g., Read-only, Write-only). This supports the principle of least privilege, limits exposure if a key is compromised, and provides clear audit trails for different integrations.
+* **Monetization Hooks:** Integrate Stripe webhooks for secure subscription and payment handling.
+* **Production LLM Driver:** Add secure environment variables to easily toggle between local Ollama and cloud-based LLMs (e.g., OpenAI/Claude) for production.
 
-## Phase 2: Data Enrichment & Context (Smart MVP)
-*Goal: Enhance AI suggestions using real-time external data.*
+## Phase 3: Core App Setup & Experience (Frontend)
+*Goal: Build the initial Flutter application connecting to the secure foundational API.*
 
-### 2.1 Backend Enrichment (API v1.1)
-- [ ] **Weather Integration:** Implement `OpenWeatherService` to fetch weather data based on date/location.
-- [ ] **Geo-Data Processing:** Logic to handle coordinates (Lat/Lon) and pass location context to the LLM.
-- [ ] **Advanced Prompting:** Use Blade templates for prompts to inject dynamic context (e.g., "It's raining outside").
-- [ ] **JSONB History:** Store every request and LLM response in PostgreSQL for history and debugging.
+* **Project Initialization:** Set up the Flutter project structure, safe storage for API tokens, and core routing.
+* **Auth Flow:** Implement Login, Registration, and Profile management screens connecting to the Sanctum endpoints.
+* **Input Mask (Form):** Build user interfaces for parameters (Budget slider, Vibe tags, Energy Level, No-Goes) ensuring client-side validation matches the API rules.
+* **Results View:** Create a clean, accessible list interface to parse and display the structured JSON date ideas.
+* **Quota & Status Indicators:** Show users their remaining free generations and provide transparent loading states for data processing.
 
-### 2.2 Frontend Enhancements
-- [ ] **Location Integration:** Use `geolocator` to automatically detect and send coordinates to the API.
-- [ ] **Weather Preview:** Small UI widget showing the forecast for the selected date.
+## Phase 4: Polish & Advanced Features (Frontend)
+*Goal: Implement context-aware features, premium upgrades, and UI refinements.*
 
----
-
-## Phase 3: User Management & Compliance
-*Goal: Secure authentication and GDPR-compliant data handling.*
-
-### 3.1 Backend Security & Quota
-- [ ] **Laravel Sanctum Auth:** Implementation of secure API tokens for mobile users.
-- [ ] **Weekly Quota Logic:** Database-level check to enforce the "5 free ideas per week" limit.
-- [ ] **User Profile API:** Endpoints to store/retrieve persistent preferences (No-Goes, UI Mode).
-- [ ] **GDPR Tools:** Automated data export and account deletion endpoints.
-
-### 3.2 Frontend User Experience
-- [ ] **Auth Flow:** Login, Registration, and Profile management screens.
-- [ ] **Quota Indicator:** Display how many free ideas are remaining for the current week.
-
----
-
-## Phase 4: Monetization & Production (Scale)
-*Goal: Transition to professional cloud services and revenue generation.*
-
-### 4.1 Payment & Production Backend
-- [ ] **Stripe Integration:** Webhook handling for successful payments/subscriptions.
-- [ ] **Production LLM Driver:** Toggle between local Ollama and OpenAI/Claude via ENV variables.
-- [ ] **Response Caching:** Intelligent caching to reduce LLM costs for identical request patterns.
-
-### 4.2 Polished Frontend
-- [ ] **Stripe Checkout:** Seamless payment flow within the app.
-- [ ] **Enhanced Animations:** High-quality animations (Lottie/Rive) for the specialized "Woman-Look".
+* **Location Services:** Integrate `geolocator` to securely prompt for permissions and detect user coordinates for the API.
+* **Contextual UI:** Add small widgets (like Weather Previews) to show users the active context for their generated date.
+* **Dual-Theme Logic:** Implement the "Default" and "Woman-Look" (Rose/Gold) theme toggles, respecting user preferences stored in the API.
+* **Premium Upgrades (Stripe Checkout):** Create seamless, secure in-app purchase flows to upgrade limits.
+* **Enhanced Animations:** Add high-quality animations (Lottie/Rive) for loading states and specialized visual experiences.

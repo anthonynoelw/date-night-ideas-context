@@ -34,7 +34,8 @@ Extensible storage for all user preferences (e.g., `theme_preference` = `rose_go
 
 ### `personal_access_tokens` (Sanctum)
 * **`id`**: ULID (Primary Key)
-* **`user_id`**: ULID (Foreign Key -> users, Nullable)
+* **`tokenable_type`**: String
+* **`tokenable_id`**: ULID
 * **`name`**: String
 * **`token`**: String (Unique, Hashed)
 * **`abilities`**: Text (JSON, Nullable)
@@ -150,6 +151,7 @@ Replaces generic tags for managing restrictions, dietary needs, and activities t
 * **`id`**: ULID (Primary Key)
 * **`name`**: String
 * **`slug`**: String (Unique)
+* **`type`**: String (e.g., 'dietary', 'physical', 'environmental')
 * **`icon`**: String (Nullable)
 * **`created_at`**: Timestamp
 * **`updated_at`**: Timestamp
@@ -193,7 +195,7 @@ GDPR Support.
 
 ### `legal_consents`
 * **`id`**: ULID (Primary Key)
-* **`user_id`**: ULID (Foreign Key -> users, Nullable)
+* **`user_id`**: ULID (Foreign Key -> users, OnDelete: Cascade)
 * **`document_type`**: String (e.g., 'tos', 'privacy')
 * **`version`**: String (e.g., '1.0')
 * **`ip_address`**: String (Nullable, Anonymized)
@@ -201,7 +203,7 @@ GDPR Support.
 
 ### `data_export_requests`
 * **`id`**: ULID (Primary Key)
-* **`user_id`**: ULID (Foreign Key -> users, Nullable)
+* **`user_id`**: ULID (Foreign Key -> users, OnDelete: Cascade)
 * **`status`**: String (pending, processing, completed, failed)
 * **`download_path`**: String (Nullable)
 * **`expires_at`**: Timestamp
